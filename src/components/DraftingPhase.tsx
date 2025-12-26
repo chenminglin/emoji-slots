@@ -10,16 +10,50 @@ export function DraftingPhase() {
     const [options, setOptions] = useState<string[]>([]);
 
     useEffect(() => {
-        // Pick 3 random symbols to offer
-        // In a real game, this would be weighted by rarity
-        const allIds = Object.keys(SYMBOLS);
-        const randomPicks = [];
-        for (let i = 0; i < 3; i++) {
-            const randomId = allIds[Math.floor(Math.random() * allIds.length)];
-            randomPicks.push(randomId);
+        // Weighted random selection based on GDD
+        const getWeightedRarity = (): 'common' | 'uncommon' | 'rare' | 'legendary' => {
+            const rand = Math.random() * 100;
+            if (rand < 60) return 'common';
+            if (rand < 85) return 'uncommon'; // 60 + 25
+            if (rand < 97) return 'rare';     // 85 + 12
+            return 'legendary';               // Remainder 3%
+        };
+
+        const getRandomSymbolByRarity = (rarity: string) => {
+            const symbolsOfRarity = Object.values(SYMBOLS).filter(s => s.rarity === rarity);
+            if (symbolsOfRarity.length === 0) return null;
+            return symbolsOfRarity[Math.floor(Math.random() * symbolsOfRarity.length)];
+        };
+
+        const newOptions: string[] = [];
+        while (newOptions.length < 3) {
+            const rarity = getWeightedRarity();
+            const symbol = getRandomSymbolByRarity(rarity);
+
+            // Fallback if no symbol found for rarity (shouldn't happen if data is complete)
+            // Also avoid duplicates in the same draft? Let's allow duplicates for now or retry.
+            // Let's retry if duplicate or null.
+            if (symbol && !newOptions.includes(symbol.id)) {
+                newOptions.push(symbol.id);
+            } else if (!symbol) {
+                // Fallback to common if something breaks
+                const common = getRandomSymbolByRarity('common');
+                if (common && !newOptions.includes(common.id)) newOptions.push(common.id);
+            }
         }
-        setOptions(randomPicks);
+
+        setOptions(newOptions);
     }, []);
+
+    const getRarityColor = (rarity: string) => {
+        switch (rarity) {
+            case 'common': return 'text-gray-300 border-gray-600';
+            case 'uncommon': return 'text-green-400 border-green-600';
+            case 'rare': return 'text-blue-400 border-blue-600';
+            case 'legendary': return 'text-orange-400 border-orange-600';
+            default: return 'text-gray-300 border-gray-600';
+        }
+    };
 
     return (
         <motion.div
@@ -31,14 +65,17 @@ export function DraftingPhase() {
             <div className="flex justify-around gap-2">
                 {options.map((id, idx) => {
                     const sym = SYMBOLS[id];
+                    const rarityColors = getRarityColor(sym.rarity);
+
                     return (
                         <button
                             key={idx}
                             onClick={() => draftSymbol(id)}
-                            className="flex flex-col items-center p-3 bg-gray-700 rounded-xl hover:bg-gray-600 active:scale-95 transition-all w-1/3"
+                            className={`flex flex-col items-center p-3 bg-gray-700 rounded-xl hover:bg-gray-600 active:scale-95 transition-all w-1/3 border-2 ${rarityColors.split(' ')[1]}`}
                         >
                             <span className="text-4xl mb-2">{sym.icon}</span>
-                            <span className="font-bold text-sm text-yellow-300">{sym.name}</span>
+                            <span className={`font-bold text-sm ${rarityColors.split(' ')[0]}`}>{sym.name}</span>
+                            <span className="text-xs text-gray-500 uppercase tracking-widest scale-75 origin-center">{sym.rarity}</span>
                             <span className="text-xs text-gray-400 mt-1">{sym.value} Coin{sym.value !== 1 ? 's' : ''}</span>
                             <span className="text-[10px] text-gray-500 mt-1 text-center leading-tight">{sym.description}</span>
                         </button>
@@ -46,7 +83,7 @@ export function DraftingPhase() {
                 })}
             </div>
             <button
-                onClick={() => draftSymbol('poop')} // Skip button (basic impl, maybe gives 1 coin or literally nothing)
+                onClick={() => draftSymbol('skip')}
                 className="w-full mt-4 py-2 text-gray-500 text-sm hover:text-white"
             >
                 Skip

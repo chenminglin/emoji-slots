@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGameStore } from "@/store/gameStore";
 import { SlotGrid } from "@/components/SlotGrid";
 import { DraftingPhase } from "@/components/DraftingPhase";
@@ -13,10 +13,35 @@ export default function Home() {
   const { coins, rent, spinsUntilRent, phase, grid, spin } = useGameStore();
   const [showDeck, setShowDeck] = useState(false);
 
+  // Coin animation state
+  const [displayedCoins, setDisplayedCoins] = useState(coins);
+
+  // Animate coins
+  useEffect(() => {
+    if (coins === displayedCoins) return;
+
+    // Simple lerp or step approach
+    const diff = coins - displayedCoins;
+    const step = Math.ceil(diff / 10); // 10 steps roughly
+
+    const interval = setInterval(() => {
+      setDisplayedCoins(prev => {
+        const next = prev + step;
+        if ((step > 0 && next >= coins) || (step < 0 && next <= coins)) {
+          clearInterval(interval);
+          return coins;
+        }
+        return next;
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [coins, displayedCoins]);
+
   const isSpinning = phase === GamePhase.SPINNING;
   const isDrafting = phase === GamePhase.DRAFTING;
   const isGameOver = phase === GamePhase.GAME_OVER;
-  const isPayout = phase === GamePhase.PAYOUT;
+  const isScoring = phase === GamePhase.SCORING;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between bg-gray-900 text-white relative overflow-hidden">
@@ -25,7 +50,7 @@ export default function Home() {
         <div className="flex justify-between items-end">
           <div className="flex flex-col">
             <span className="text-gray-400 text-xs uppercase tracking-wider">Balance</span>
-            <span className="text-4xl font-bold text-yellow-400">🪙 {coins}</span>
+            <span className="text-4xl font-bold text-yellow-400">🪙 {displayedCoins}</span>
           </div>
           <div className="flex flex-col items-end">
             <span className="text-gray-400 text-xs uppercase tracking-wider">Rent Due</span>
@@ -45,7 +70,7 @@ export default function Home() {
 
       {/* Game Board */}
       <div className="flex-1 flex items-center justify-center w-full p-4 z-10">
-        <SlotGrid grid={grid} isSpinning={isSpinning} />
+        <SlotGrid grid={grid} isSpinning={isSpinning} isScoring={isScoring} />
       </div>
 
       {/* Controls */}
@@ -59,10 +84,10 @@ export default function Home() {
         </button>
         <button
           onClick={spin}
-          disabled={isSpinning || isDrafting || isGameOver || isPayout}
+          disabled={isSpinning || isDrafting || isGameOver || isScoring}
           className="flex-1 py-4 text-2xl font-black rounded-2xl bg-gradient-to-b from-yellow-400 to-orange-600 text-white shadow-[0_5px_0_rgb(180,83,9)] active:shadow-none active:translate-y-[5px] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:shadow-[0_5px_0_rgb(180,83,9)] transition-all uppercase tracking-widest border-2 border-yellow-300"
         >
-          {isSpinning || isPayout ? "Spinning..." : "SPIN!"}
+          {isSpinning || isScoring ? "Spinning..." : "SPIN!"}
         </button>
       </footer>
 
