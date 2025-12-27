@@ -13,10 +13,10 @@ export function DraftingPhase() {
         // Weighted random selection based on GDD
         const getWeightedRarity = (): 'common' | 'uncommon' | 'rare' | 'legendary' => {
             const rand = Math.random() * 100;
-            if (rand < 60) return 'common';
-            if (rand < 85) return 'uncommon'; // 60 + 25
-            if (rand < 97) return 'rare';     // 85 + 12
-            return 'legendary';               // Remainder 3%
+            if (rand < 75) return 'common';
+            if (rand < 93) return 'uncommon'; // 75 + 18
+            if (rand < 99.7) return 'rare';   // 93 + 6.7
+            return 'legendary';               // Remainder 0.3%
         };
 
         const getRandomSymbolByRarity = (rarity: string) => {
