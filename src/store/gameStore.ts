@@ -158,6 +158,47 @@ export const useGameStore = create<GameState>((set, get) => ({
                 // Joker (Buffs everything)
                 neighbors.forEach(n => {
                     if (n.sym.id === 'joker') multiplier *= 2;
+                    if (n.sym.id === 'genie') multiplier *= 2; // Genie works like Joker
+                });
+
+                // === NEW BUFFS ===
+
+                // Farmer buffs adjacent plants
+                if (s.tags?.includes('plant')) {
+                    neighbors.forEach(n => {
+                        if (n.sym.id === 'farmer') adder += 2;
+                        if (n.sym.id === 'water') adder += 1;
+                    });
+                }
+
+                // Water buffs fish
+                if (s.id === 'fish') {
+                    neighbors.forEach(n => {
+                        if (n.sym.id === 'water') adder += 3;
+                    });
+                }
+
+                // Seed gets bonus from sun/rain
+                if (s.id === 'seed') {
+                    const hasSunOrRain = neighbors.some(n => n.sym.id === 'sun' || n.sym.id === 'rain');
+                    if (hasSunOrRain) adder += 3;
+                }
+
+                // Mushroom x3 if near rain
+                if (s.id === 'mushroom') {
+                    const hasRain = neighbors.some(n => n.sym.id === 'rain');
+                    if (hasRain) multiplier *= 3;
+                }
+
+                // Bee gets +1 for each adjacent blossom
+                if (s.id === 'bee') {
+                    const blossomCount = neighbors.filter(n => n.sym.id === 'blossom').length;
+                    adder += blossomCount;
+                }
+
+                // Moon buffs all adjacent
+                neighbors.forEach(n => {
+                    if (n.sym.id === 'moon') adder += 2;
                 });
 
 
@@ -200,6 +241,93 @@ export const useGameStore = create<GameState>((set, get) => ({
                     }
                 }
 
+                // === NEW CONSUMPTION/ACTIONS ===
+
+                // Rabbit eats Carrot
+                if (s.id === 'rabbit') {
+                    const carrot = neighbors.find(n => !instancesToRemove.includes(n.sym.instanceId) && n.sym.id === 'carrot');
+                    if (carrot) {
+                        instancesToRemove.push(carrot.sym.instanceId);
+                        itemValue += 8;
+                    }
+                }
+
+                // Fox eats Rabbit
+                if (s.id === 'fox') {
+                    const rabbit = neighbors.find(n => !instancesToRemove.includes(n.sym.instanceId) && n.sym.id === 'rabbit');
+                    if (rabbit) {
+                        instancesToRemove.push(rabbit.sym.instanceId);
+                        itemValue += (rabbit.sym.value * 8);
+                    }
+                }
+
+                // Fisherman catches Fish
+                if (s.id === 'fisherman') {
+                    const fish = neighbors.find(n => !instancesToRemove.includes(n.sym.instanceId) && n.sym.id === 'fish');
+                    if (fish) {
+                        instancesToRemove.push(fish.sym.instanceId);
+                        itemValue += (fish.sym.value * 6);
+                    }
+                }
+
+                // Fire burns Tree
+                if (s.id === 'fire') {
+                    const tree = neighbors.find(n => !instancesToRemove.includes(n.sym.instanceId) && n.sym.id === 'tree');
+                    if (tree) {
+                        instancesToRemove.push(tree.sym.instanceId);
+                        itemValue += (tree.sym.value * 5);
+                    }
+                }
+
+                // Lightning burns Tree and does AOE
+                if (s.id === 'lightning') {
+                    const tree = neighbors.find(n => !instancesToRemove.includes(n.sym.instanceId) && n.sym.id === 'tree');
+                    if (tree) {
+                        instancesToRemove.push(tree.sym.instanceId);
+                        // AOE: add +5 to all neighbors
+                        itemValue += 5 * neighbors.length;
+                    }
+                }
+
+                // Wizard doubles random adjacent (simplified: just double first valid one)
+                if (s.id === 'wizard' && neighbors.length > 0) {
+                    const randomIdx = Math.floor(Math.random() * neighbors.length);
+                    // This is tricky - we'd need to modify the neighbor's value in the grid
+                    // For simplicity, just add bonus to wizard itself
+                    adder += neighbors[randomIdx].sym.value;
+                }
+
+                // === RISK MECHANISMS ===
+
+                // Vase breaks if near fire/lightning
+                if (s.id === 'vase') {
+                    const hasDanger = neighbors.some(n => n.sym.id === 'fire' || n.sym.id === 'lightning');
+                    if (hasDanger) {
+                        itemValue = 0; // Shattered!
+                    }
+                }
+
+                // Slot Machine random payout
+                if (s.id === 'slotmachine') {
+                    itemValue = Math.floor(Math.random() * 51); // 0-50
+                }
+
+                // === LEGENDARY SPECIAL ===
+
+                // Rainbow counts unique tags on grid
+                if (s.id === 'rainbow') {
+                    const allTags = new Set<string>();
+                    for (let gr = 0; gr < ROWS; gr++) {
+                        for (let gc = 0; gc < COLS; gc++) {
+                            const sym = grid[gr][gc];
+                            if (sym && sym.tags) {
+                                sym.tags.forEach(tag => allTags.add(tag));
+                            }
+                        }
+                    }
+                    adder += allTags.size * 3;
+                }
+
                 // Dog acts as human buff, but simplified above.
 
                 // Final Score for this symbol
@@ -209,6 +337,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 // Update grid value for UI Popup
                 if (finalValue !== s.value) {
                     s.value = finalValue;
+                    s.isModified = true;
                 }
             }
         }

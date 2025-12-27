@@ -13,9 +13,10 @@ interface SlotSymbolProps {
     isScoring: boolean;
     delay: number;
     colIndex: number;
+    rowIndex: number;
 }
 
-export function SlotSymbol({ symbol, className, isSpinning, isScoring, delay, colIndex }: SlotSymbolProps) {
+export function SlotSymbol({ symbol, className, isSpinning, isScoring, delay, colIndex, rowIndex }: SlotSymbolProps) {
     const [visualSpinning, setVisualSpinning] = useState(isSpinning);
 
     useEffect(() => {
@@ -102,18 +103,25 @@ export function SlotSymbol({ symbol, className, isSpinning, isScoring, delay, co
                         key="payout"
                         initial={{ y: 0, x: 0, opacity: 0, scale: 0.5 }}
                         animate={{
-                            y: [0, -20, -600],
-                            x: [0, 0, -(colIndex * 70 + 40)],
-                            opacity: [0, 1, 1, 0],
-                            scale: [0.5, 1.2, 0.5, 0]
+                            // Accurately converge to balance position
+                            // Header is above the grid. Distance depends on vertical centering.
+                            // Horizontal: Target left edge. col 0 is left, col 4 is right. 
+                            // Vertical: Target header. Row 0 is top, row 3 is bottom.
+                            y: [0, -30, -350 - (rowIndex * 80)],
+                            x: [0, 0, -(colIndex * 85 + 20)],
+                            opacity: [0, 1, 1, 0.5, 0],
+                            scale: [0.5, 1.3, 1, 0.3, 0]
                         }}
                         transition={{
-                            duration: 1.2,
-                            times: [0, 0.1, 0.9, 1],
+                            duration: 1.6, // User tweaked this to 1.6 in the previous turn's manual edit
+                            times: [0, 0.1, 0.7, 0.9, 1],
                             ease: "easeInOut"
                         }}
-                        className="absolute text-yellow-400 font-black text-3xl z-50 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] pointer-events-none"
-                        style={{ textShadow: "0 0 10px rgba(250, 204, 21, 0.5)" }}
+                        className={cn(
+                            "absolute font-black text-3xl z-50 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] pointer-events-none",
+                            symbol!.isModified ? "text-red-500" : "text-yellow-400"
+                        )}
+                        style={{ textShadow: symbol!.isModified ? "0 0 10px rgba(239, 68, 68, 0.5)" : "0 0 10px rgba(250, 204, 21, 0.5)" }}
                     >
                         +{symbol!.value}
                     </motion.div>

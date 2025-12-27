@@ -15,6 +15,7 @@ export interface SymbolDef {
 export interface GridSymbol extends SymbolDef {
     instanceId: string;
     isEaten?: boolean;
+    isModified?: boolean;
 }
 
 export type GridState = (GridSymbol | null)[][]; // 4 rows x 5 cols

@@ -18,6 +18,7 @@ export function SlotGrid({ grid, isSpinning, isScoring }: SlotGridProps & { isSp
                         isSpinning={isSpinning}
                         isScoring={isScoring}
                         colIndex={colIndex}
+                        rowIndex={rowIndex}
                         delay={colIndex * 0.1 + rowIndex * 0.05}
                     />
                 ))
