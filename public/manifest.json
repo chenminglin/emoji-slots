@@ -1,0 +1,16 @@
+{
+    "name": "Emoji Slots",
+    "short_name": "EmojiSlots",
+    "description": "A rogue-like emoji slot machine game.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#111827",
+    "theme_color": "#111827",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "64x64",
+            "type": "image/x-icon"
+        }
+    ]
+}
