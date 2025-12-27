@@ -15,6 +15,7 @@ interface GameState {
     grid: GridState;
     phase: GamePhase;
     showDeck: boolean;
+    isDraftMinimized: boolean;
 
     // Actions
     spin: () => void;
@@ -22,6 +23,7 @@ interface GameState {
     payout: () => void;
     payRent: () => void;
     toggleDeck: (show?: boolean) => void;
+    setMinimized: (minimized: boolean) => void;
 }
 
 const generateInstanceId = () => Math.random().toString(36).substr(2, 9);
@@ -34,6 +36,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     grid: Array(ROWS).fill(Array(COLS).fill(null)),
     phase: GamePhase.IDLE,
     showDeck: false,
+    isDraftMinimized: false,
 
     spin: () => {
         const { deck, coins, spinsUntilRent } = get();
@@ -446,9 +449,14 @@ export const useGameStore = create<GameState>((set, get) => ({
                 coins,
                 rent,
                 spinsUntilRent,
-                phase
+                phase,
+                isDraftMinimized: false // Reset when done
             };
         });
+    },
+
+    setMinimized: (minimized) => {
+        set({ isDraftMinimized: minimized });
     },
 
     payRent: () => {

@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 export default function Home({ params }: { params: Promise<{ locale: string }> }) {
-  const { coins, rent, spinsUntilRent, phase, grid, spin, showDeck, toggleDeck } = useGameStore();
+  const { coins, rent, spinsUntilRent, phase, grid, spin, showDeck, toggleDeck, isDraftMinimized, setMinimized } = useGameStore();
   const t = useTranslations('ui');
   const routeParams = useParams();
   const locale = routeParams.locale as string;
@@ -51,16 +51,16 @@ export default function Home({ params }: { params: Promise<{ locale: string }> }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between bg-gray-900 text-white relative overflow-hidden">
       {/* Header Info */}
-      <header className="w-full max-w-md p-4 flex flex-col gap-2 z-10">
+      <header className="w-full max-w-md lg:max-w-2xl p-4 lg:p-6 flex flex-col gap-2 z-10">
         <div className="flex justify-between items-end">
           <div className="flex flex-col">
-            <span className="text-gray-400 text-xs uppercase tracking-wider">{t('coins')}</span>
-            <span className="text-4xl font-bold text-yellow-400">🪙 {displayedCoins}</span>
+            <span className="text-gray-400 text-xs lg:text-sm uppercase tracking-wider">{t('coins')}</span>
+            <span className="text-4xl lg:text-5xl font-bold text-yellow-400">🪙 {displayedCoins}</span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-gray-400 text-xs uppercase tracking-wider">{t('rentDue')}</span>
-            <span className="text-xl font-bold text-red-400">{rent} 🪙</span>
-            <span className="text-sm text-gray-400">{t('spinsLeft')}: {spinsUntilRent}</span>
+            <span className="text-gray-400 text-xs lg:text-sm uppercase tracking-wider">{t('rentDue')}</span>
+            <span className="text-xl lg:text-2xl font-bold text-red-400">{rent} 🪙</span>
+            <span className="text-sm lg:text-base text-gray-400">{t('spinsLeft')}: {spinsUntilRent}</span>
           </div>
         </div>
 
@@ -79,7 +79,7 @@ export default function Home({ params }: { params: Promise<{ locale: string }> }
       </div>
 
       {/* Controls */}
-      <footer className="w-full max-w-md p-6 pb-12 bg-gray-900/90 z-10 flex gap-4">
+      <footer className="w-full max-w-md lg:max-w-2xl p-6 pb-12 bg-gray-900/90 z-10 flex gap-4">
         <button
           onClick={() => toggleDeck(true)}
           className="p-4 rounded-2xl bg-gray-800 border-2 border-gray-700 text-gray-300 shadow-[0_5px_0_rgb(55,65,81)] active:shadow-none active:translate-y-[5px] transition-all flex items-center justify-center hover:bg-gray-700 hover:text-white"
@@ -97,17 +97,33 @@ export default function Home({ params }: { params: Promise<{ locale: string }> }
           <BookOpen size={24} />
         </a>
         <button
-          onClick={spin}
-          disabled={isSpinning || isDrafting || isGameOver || isScoring}
-          className="flex-1 py-4 text-2xl font-black rounded-2xl bg-gradient-to-b from-yellow-400 to-orange-600 text-white shadow-[0_5px_0_rgb(180,83,9)] active:shadow-none active:translate-y-[5px] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:shadow-[0_5px_0_rgb(180,83,9)] transition-all uppercase tracking-widest border-2 border-yellow-300"
+          onClick={() => {
+            if (isDrafting && isDraftMinimized) {
+              setMinimized(false);
+            } else if (!isSpinning && !isDrafting && !isGameOver && !isScoring) {
+              spin();
+            }
+          }}
+          disabled={(isSpinning || isGameOver || isScoring) || (isDrafting && !isDraftMinimized)}
+          className="relative flex-1 py-4 text-2xl font-black rounded-2xl bg-gradient-to-b from-yellow-400 to-orange-600 text-white shadow-[0_5px_0_rgb(180,83,9)] active:shadow-none active:translate-y-[5px] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:shadow-[0_5px_0_rgb(180,83,9)] transition-all uppercase tracking-widest border-2 border-yellow-300"
         >
-          {isSpinning || isScoring ? t('spinning') : t('spin')}
+          {isDrafting && isDraftMinimized ? (
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-lg lg:text-xl">{t('showSelection')}</span>
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 lg:h-5 lg:w-5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 lg:h-5 lg:w-5 bg-red-500"></span>
+              </span>
+            </div>
+          ) : (
+            isSpinning || isScoring ? t('spinning') : t('spin')
+          )}
         </button>
       </footer>
 
       <AnimatePresence>
         {showDeck && <DeckView key="deck-overlay" onClose={() => toggleDeck(false)} />}
-        {isDrafting && (
+        {isDrafting && !isDraftMinimized && (
           <motion.div
             key="draft-overlay"
             initial={{ opacity: 0 }}

@@ -98,22 +98,26 @@ export function SlotSymbol({ symbol, className, isSpinning, isScoring, delay, co
 
             {/* Flying Number - Outside Clipper so it can fly off grid */}
             <AnimatePresence>
-                {!visualSpinning && isScoring && symbol && !symbol.isEaten && (
+                {!visualSpinning && (process.env.NODE_ENV === 'development' ? (symbol && !symbol.isEaten && symbol.value > 0) : (isScoring && symbol && !symbol.isEaten)) && (
                     <motion.div
                         key="payout"
                         initial={{ y: 0, x: 0, opacity: 0, scale: 0.5 }}
-                        animate={{
+                        animate={process.env.NODE_ENV === 'development' ? {
+                            y: -40,
+                            x: 0,
+                            opacity: 1,
+                            scale: 1.2
+                        } : {
                             // Accurately converge to balance position
-                            // Header is above the grid. Distance depends on vertical centering.
-                            // Horizontal: Target left edge. col 0 is left, col 4 is right. 
-                            // Vertical: Target header. Row 0 is top, row 3 is bottom.
                             y: [0, -30, -350 - (rowIndex * 80)],
                             x: [0, 0, -(colIndex * 85 + 20)],
                             opacity: [0, 1, 1, 0.5, 0],
                             scale: [0.5, 1.3, 1, 0.3, 0]
                         }}
-                        transition={{
-                            duration: 1.6, // User tweaked this to 1.6 in the previous turn's manual edit
+                        transition={process.env.NODE_ENV === 'development' ? {
+                            duration: 0.3
+                        } : {
+                            duration: 1.6,
                             times: [0, 0.1, 0.7, 0.9, 1],
                             ease: "easeInOut"
                         }}

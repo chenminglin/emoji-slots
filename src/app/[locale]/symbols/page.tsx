@@ -55,13 +55,13 @@ export default function SymbolsPage() {
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <Link
-                        href={`/${locale}`}
-                        className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 mb-4 transition-colors"
+                    <button
+                        onClick={() => window.close()}
+                        className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 mb-4 transition-colors cursor-pointer"
                     >
                         <ArrowLeft size={20} />
-                        <span>{locale === 'zh' ? '返回游戏' : 'Back to Game'}</span>
-                    </Link>
+                        <span>{locale === 'zh' ? '关闭图鉴' : 'Close Guide'}</span>
+                    </button>
                     <h1 className="text-4xl font-black text-yellow-400 mb-2">
                         {locale === 'zh' ? '符号图鉴' : 'Symbol Guide'}
                     </h1>

@@ -5,11 +5,12 @@ import { useGameStore } from "@/store/gameStore";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from 'next-intl';
-import { Backpack } from "lucide-react";
+import { Backpack, EyeOff } from "lucide-react";
 
 export function DraftingPhase() {
     const draftSymbol = useGameStore((state) => state.draftSymbol);
     const toggleDeck = useGameStore((state) => state.toggleDeck);
+    const setMinimized = useGameStore((state) => state.setMinimized);
     const [options, setOptions] = useState<string[]>([]);
     const tCommon = useTranslations('common');
     const tUncommon = useTranslations('uncommon');
@@ -75,19 +76,28 @@ export function DraftingPhase() {
         <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="absolute bottom-0 left-0 right-0 bg-gray-800 p-6 rounded-t-2xl border-t-2 border-yellow-500 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-20"
+            className="absolute bottom-0 left-0 right-0 bg-gray-800 p-4 lg:p-8 rounded-t-2xl border-t-2 border-yellow-500 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-20 max-w-4xl mx-auto"
         >
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-white">{tUI('chooseSymbol')}</h2>
-                <button
-                    onClick={() => toggleDeck(true)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20 transition-all text-sm font-bold"
-                >
-                    <Backpack size={16} />
-                    {tUI('viewDeck')}
-                </button>
+            <div className="flex justify-between items-center mb-4 lg:mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-white">{tUI('chooseSymbol')}</h2>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setMinimized(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-700 border border-gray-600 text-gray-300 hover:bg-gray-600 transition-all text-sm lg:text-base font-bold"
+                        title="Hide"
+                    >
+                        <EyeOff size={16} />
+                    </button>
+                    <button
+                        onClick={() => toggleDeck(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20 transition-all text-sm lg:text-base font-bold"
+                    >
+                        <Backpack size={16} />
+                        {tUI('viewDeck')}
+                    </button>
+                </div>
             </div>
-            <div className="flex justify-around gap-2">
+            <div className="flex flex-col lg:flex-row justify-around gap-3 lg:gap-4">
                 {options.map((id, idx) => {
                     const sym = SYMBOLS[id];
                     const rarityColors = getRarityColor(sym.rarity);
@@ -96,13 +106,13 @@ export function DraftingPhase() {
                         <button
                             key={idx}
                             onClick={() => draftSymbol(id)}
-                            className={`flex flex-col items-center p-3 bg-gray-700 rounded-xl hover:bg-gray-600 active:scale-95 transition-all w-1/3 border-2 ${rarityColors.split(' ')[1]}`}
+                            className={`flex flex-col items-center p-4 lg:p-6 bg-gray-700 rounded-xl hover:bg-gray-600 active:scale-95 transition-all w-full lg:w-1/3 border-2 ${rarityColors.split(' ')[1]}`}
                         >
-                            <span className="text-4xl mb-2">{sym.icon}</span>
-                            <span className={`font-bold text-sm ${rarityColors.split(' ')[0]}`}>{getSymbolName(sym.id, sym.rarity)}</span>
-                            <span className="text-xs text-gray-500 uppercase tracking-widest scale-75 origin-center">{sym.rarity}</span>
-                            <span className="text-xs text-gray-400 mt-1">{sym.value} {tUI('coins')}</span>
-                            <span className="text-[10px] text-gray-500 mt-1 text-center leading-tight">{tDesc(sym.id)}</span>
+                            <span className="text-5xl lg:text-6xl mb-3">{sym.icon}</span>
+                            <span className={`font-bold text-base lg:text-lg mb-1 ${rarityColors.split(' ')[0]}`}>{getSymbolName(sym.id, sym.rarity)}</span>
+                            <span className="text-xs lg:text-sm text-gray-400 uppercase tracking-widest mb-2">{sym.rarity}</span>
+                            <span className="text-sm lg:text-base text-gray-300 mb-2">{sym.value} {tUI('coins')}</span>
+                            <span className="text-xs lg:text-sm text-gray-300 text-center leading-relaxed">{tDesc(sym.id)}</span>
                         </button>
                     );
                 })}
