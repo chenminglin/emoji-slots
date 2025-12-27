@@ -10,10 +10,10 @@ interface SlotGridProps {
 export function SlotGrid({ grid, isSpinning, isScoring }: SlotGridProps & { isSpinning: boolean; isScoring: boolean }) {
     return (
         <div className="grid grid-cols-5 gap-2 p-4 bg-gray-900 rounded-xl border-4 border-yellow-600 shadow-2xl w-full max-w-md mx-auto aspect-[5/4]">
-            {grid.map((row, rowIndex) =>
+            {grid.flatMap((row, rowIndex) =>
                 row.map((symbol, colIndex) => (
                     <SlotSymbol
-                        key={`${rowIndex}-${colIndex}-${symbol ? symbol.instanceId : 'empty'}`}
+                        key={`${rowIndex}-${colIndex}-${symbol?.instanceId || 'empty'}`}
                         symbol={symbol}
                         isSpinning={isSpinning}
                         isScoring={isScoring}

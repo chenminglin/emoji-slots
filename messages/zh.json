@@ -107,6 +107,9 @@
         "spinsLeft": "剩余旋转",
         "gameOver": "游戏结束！",
         "rentDue": "应付租金",
-        "notEnoughCoins": "金币不足"
+        "notEnoughCoins": "金币不足",
+        "viewDeck": "查看目前符号",
+        "yourSymbols": "你的符号",
+        "totalSymbols": "总符号数"
     }
 }

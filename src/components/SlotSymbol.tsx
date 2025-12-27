@@ -70,7 +70,7 @@ export function SlotSymbol({ symbol, className, isSpinning, isScoring, delay, co
                                 {symbol!.icon}
                             </motion.div>
                         ) : (
-                            <div className="text-gray-700 text-sm"></div>
+                            <div key="empty-slot" className="text-gray-700 text-sm"></div>
                         )
                     )}
                 </AnimatePresence>

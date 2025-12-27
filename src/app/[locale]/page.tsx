@@ -13,8 +13,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 export default function Home({ params }: { params: Promise<{ locale: string }> }) {
-  const { coins, rent, spinsUntilRent, phase, grid, spin } = useGameStore();
-  const [showDeck, setShowDeck] = useState(false);
+  const { coins, rent, spinsUntilRent, phase, grid, spin, showDeck, toggleDeck } = useGameStore();
   const t = useTranslations('ui');
   const routeParams = useParams();
   const locale = routeParams.locale as string;
@@ -82,7 +81,7 @@ export default function Home({ params }: { params: Promise<{ locale: string }> }
       {/* Controls */}
       <footer className="w-full max-w-md p-6 pb-12 bg-gray-900/90 z-10 flex gap-4">
         <button
-          onClick={() => setShowDeck(true)}
+          onClick={() => toggleDeck(true)}
           className="p-4 rounded-2xl bg-gray-800 border-2 border-gray-700 text-gray-300 shadow-[0_5px_0_rgb(55,65,81)] active:shadow-none active:translate-y-[5px] transition-all flex items-center justify-center hover:bg-gray-700 hover:text-white"
           title="View Deck"
         >
@@ -106,24 +105,27 @@ export default function Home({ params }: { params: Promise<{ locale: string }> }
         </button>
       </footer>
 
-      {/* Overlays */}
       <AnimatePresence>
-        {showDeck && (
-          <DeckView onClose={() => setShowDeck(false)} />
-        )}
-
+        {showDeck && <DeckView key="deck-overlay" onClose={() => toggleDeck(false)} />}
         {isDrafting && (
-          <div className="absolute inset-0 z-20 flex items-end pointer-events-none">
+          <motion.div
+            key="draft-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-20 flex items-end pointer-events-none"
+          >
             <div className="pointer-events-auto w-full">
               <DraftingPhase />
             </div>
-          </div>
+          </motion.div>
         )}
-
         {isGameOver && (
           <motion.div
+            key="gameover-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-8 text-center"
           >
             <h1 className="text-6xl font-black text-red-500 mb-4">GAME OVER</h1>

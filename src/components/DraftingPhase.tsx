@@ -5,9 +5,11 @@ import { useGameStore } from "@/store/gameStore";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from 'next-intl';
+import { Backpack } from "lucide-react";
 
 export function DraftingPhase() {
     const draftSymbol = useGameStore((state) => state.draftSymbol);
+    const toggleDeck = useGameStore((state) => state.toggleDeck);
     const [options, setOptions] = useState<string[]>([]);
     const tCommon = useTranslations('common');
     const tUncommon = useTranslations('uncommon');
@@ -75,7 +77,16 @@ export function DraftingPhase() {
             animate={{ y: 0, opacity: 1 }}
             className="absolute bottom-0 left-0 right-0 bg-gray-800 p-6 rounded-t-2xl border-t-2 border-yellow-500 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-20"
         >
-            <h2 className="text-center text-xl font-bold mb-4 text-white">{tUI('chooseSymbol')}</h2>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-white">{tUI('chooseSymbol')}</h2>
+                <button
+                    onClick={() => toggleDeck(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20 transition-all text-sm font-bold"
+                >
+                    <Backpack size={16} />
+                    {tUI('viewDeck')}
+                </button>
+            </div>
             <div className="flex justify-around gap-2">
                 {options.map((id, idx) => {
                     const sym = SYMBOLS[id];

@@ -14,12 +14,14 @@ interface GameState {
     deck: string[]; // List of Symbol IDs
     grid: GridState;
     phase: GamePhase;
+    showDeck: boolean;
 
     // Actions
     spin: () => void;
     draftSymbol: (symbolId: string) => void;
     payout: () => void;
     payRent: () => void;
+    toggleDeck: (show?: boolean) => void;
 }
 
 const generateInstanceId = () => Math.random().toString(36).substr(2, 9);
@@ -31,6 +33,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     deck: [...STARTING_DECK],
     grid: Array(ROWS).fill(Array(COLS).fill(null)),
     phase: GamePhase.IDLE,
+    showDeck: false,
 
     spin: () => {
         const { deck, coins, spinsUntilRent } = get();
@@ -450,5 +453,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     payRent: () => {
         // Manual pay not needed if auto
+    },
+
+    toggleDeck: (show) => {
+        set(state => ({ showDeck: show !== undefined ? show : !state.showDeck }));
     }
 }));

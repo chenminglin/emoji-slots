@@ -107,6 +107,9 @@
         "spinsLeft": "Spins Left",
         "gameOver": "Game Over!",
         "rentDue": "Rent Due",
-        "notEnoughCoins": "Not Enough Coins"
+        "notEnoughCoins": "Not Enough Coins",
+        "viewDeck": "View current symbols",
+        "yourSymbols": "Your Symbols",
+        "totalSymbols": "Total Symbols"
     }
 }
